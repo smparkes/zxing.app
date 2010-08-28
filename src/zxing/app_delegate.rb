@@ -7,6 +7,8 @@ class ZXing::AppDelegate < NSObject
 
   def applicationDidFinishLaunching notification
 
+    load_bridge_support_file resource("zxing.bridgesupport")
+
     trap "INT" do
       Dispatch::Queue.main.async do
         NSApp.terminate self
@@ -47,7 +49,11 @@ class ZXing::AppDelegate < NSObject
     @window.level = NSNormalWindowLevel
     @window.delegate = self
 
-    capture.layer.frame = NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
+    @layer = CALayer.layer
+    @layer.frame =  NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
+    @layer.backgroundColor = CGColorGetConstantColor KCGColorBlack
+
+    # capture.layer.frame = NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
 
     if @options[:show_luminance]
       capture.showLuminance = true
@@ -57,8 +63,9 @@ class ZXing::AppDelegate < NSObject
       capture.showBinary = true
     end
 
-    # main.addSublayer capture.layer
-    @window.contentView.layer = capture.layer
+    @layer.addSublayer capture.layer
+    # @window.contentView.layer = capture.layer
+    @window.contentView.layer = @layer
     @window.contentView.wantsLayer = true
 
     capture.delegate = self
@@ -79,31 +86,34 @@ class ZXing::AppDelegate < NSObject
     end
   end
 
+  def resource name
+    file = $:.detect { |path| path = File.join(path, name); path if File.exists? path }
+    File.join(file, name) if file
+  end
+
   def size_window
     frame = NSWindow.frameRectForContentRect @new_frame, styleMask:@mask
     @window.setFrame frame, display:true
-    @window.setContentAspectRatio [@new_frame.size.width, @new_frame.size.height]
+    # @window.setContentAspectRatio [@new_frame.size.width, @new_frame.size.height]
     @window.orderFrontRegardless
 
     # I've always wanted a detect which returns the first mapped ... must exist?
 
-    img = $:.detect { |path| path = File.join(path, "ZXing.icns"); path if File.exists? path }
-    img = File.join(img, "ZXing.icns") if img
+    img = resource "ZXing.icns"
 
     NSApplication.sharedApplication.setApplicationIconImage NSImage.alloc.initByReferencingFile(img) if img
   end
 
   def captureSize capture, width:width, height:height
-    video_ar = 1.0*width/height
-    window_ar = @window.frame.size.width/@window.frame.size.height
-    if (video_ar-window_ar).abs > 0.001
-      @new_frame = @window.frame
-      if video_ar > window_ar
-        @new_frame.size.height = @new_frame.size.width/video_ar
-      else
-        @new_frame.size.width = @new_frame.size.height*video_ar
+    @width = width
+    @height = height
+    Dispatch::Queue.main.async do
+      begin
+        windowWillResize @window, toSize:@window.frame.size
+        @window.orderFrontRegardless
+      rescue Exception => e
+        p e
       end
-      performSelectorOnMainThread :size_window, withObject:self, waitUntilDone:false
     end
   end
 
@@ -113,7 +123,20 @@ class ZXing::AppDelegate < NSObject
 
   def windowWillResize window, toSize:size
     frame = [0, 0, size.width, size.height]
-    NSWindow.contentRectForFrameRect frame, styleMask:@mask
+    frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
+
+    window_ar = frame.size.width/frame.size.height
+    video_ar = 1.0*@width/@height
+
+    if (video_ar-window_ar).abs > 0.001
+      if video_ar > window_ar
+        frame.origin.y = (frame.size.height-frame.size.width/video_ar)/2
+        frame.size.height = frame.size.width/video_ar
+      else
+        frame.origin.x = (frame.size.width-frame.size.height*video_ar)/2
+        frame.size.width = frame.size.height*video_ar
+      end
+    end
     @capture.layer.frame = frame
     size
   end
