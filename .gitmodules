@@ -1,3 +1,6 @@
 [submodule "vendor/zxing.rb"]
 	path = vendor/zxing.rb
 	url = bp:repositories/snapsly/zxing.rb
+[submodule "vendor/zxing"]
+	path = vendor/zxing
+	url = bp:repositories/snapsly/zxing

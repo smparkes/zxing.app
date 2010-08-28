@@ -5,8 +5,10 @@ if !defined?(RUBY_ENGINE) or RUBY_ENGINE != "macruby"
 end
 framework "AppKit"
 if NSWorkspace.sharedWorkspace.activeApplication["NSApplicationBundleIdentifier"] == "org.zxing.ZXing"
-  resources = NSBundle.mainBundle.resourcePath.fileSystemRepresentation
+  $: << NSBundle.mainBundle.resourcePath.fileSystemRepresentation
+else
+  $: << File.expand_path(File.join(File.dirname(__FILE__), "lib"))
 end
-require 'lib/zxing/app_delegate'
+require 'zxing/app_delegate'
 NSApplication.sharedApplication.delegate = ZXing::AppDelegate.new
 NSApplication.sharedApplication.run

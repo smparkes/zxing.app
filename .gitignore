@@ -1,3 +1,4 @@
 /Contents/MacOS
-/Resources/ZXing.icns
-/lib/*.dylib
+/Contents/Resources/ZXing.icns
+*.dylib
+*.bundle
