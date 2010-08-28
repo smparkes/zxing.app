@@ -1,6 +1,7 @@
 module ZXing; end;
 
 require 'zxing/objc/zxing'
+require 'zxing/main_menu'
 
 class ZXing::AppDelegate < NSObject
 
@@ -33,33 +34,32 @@ class ZXing::AppDelegate < NSObject
     @window.setFrameAutosaveName "SomeWindow"
     @window.setFrameUsingName "SomeWindow"
 
+    NSApp.mainMenu = ZXing::MainMenu.new
+
+    # @window.display
+    # @window.makeKeyWindow
+    # @window.orderFrontRegardless
+    # @window.makeMainWindow
+
     @capture = capture = ::ZXCapture.alloc.init
 
-      @window.title = 'ZXing'
-      @window.level = NSNormalWindowLevel
-      @window.delegate = self
+    @window.title = 'ZXing'
+    @window.level = NSNormalWindowLevel
+    @window.delegate = self
 
-      @menu = NSMenu.alloc.initWithTitle "ZXD"
-      NSApplication.sharedApplication.mainMenu = @menu
+    capture.layer.frame = NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
 
-      # @window.display
-      # @window.makeMainWindow
-      # @window.makeKeyWindow
-      # @window.orderFrontRegardless
+    if @options[:show_luminance]
+      capture.showLuminance = true
+    end
 
-      capture.layer.frame = NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
+    if @options[:show_binary]
+      capture.showBinary = true
+    end
 
-      if @options[:show_luminance]
-        capture.showLuminance = true
-      end
-
-      if @options[:show_binary]
-        capture.showBinary = true
-      end
-
-      # main.addSublayer capture.layer
-      @window.contentView.layer = capture.layer
-      @window.contentView.wantsLayer = true
+    # main.addSublayer capture.layer
+    @window.contentView.layer = capture.layer
+    @window.contentView.wantsLayer = true
 
     capture.delegate = self
   end
@@ -85,12 +85,12 @@ class ZXing::AppDelegate < NSObject
     @window.setContentAspectRatio [@new_frame.size.width, @new_frame.size.height]
     @window.orderFrontRegardless
 
-    file =
-      File.expand_path(File.join(File.dirname(__FILE__), 
-                                 *%w(.. .. .. vendor zxing zxingorg web zxing-icon.png)))
+    # I've always wanted a detect which returns the first mapped ... must exist?
 
-    NSApplication.sharedApplication.
-      setApplicationIconImage NSImage.alloc.initByReferencingFile(file)
+    img = $:.detect { |path| path = File.join(path, "ZXing.icns"); path if File.exists? path }
+    img = File.join(img, "ZXing.icns") if img
+
+    NSApplication.sharedApplication.setApplicationIconImage NSImage.alloc.initByReferencingFile(img) if img
   end
 
   def captureSize capture, width:width, height:height
