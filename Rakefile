@@ -20,13 +20,14 @@ directory "Contents/Resources"
 
 file "Contents/Resources/ZXing.icns" =>
   [ "Contents/Resources",
-    "vendor/zxing/zxingorg/web/zxing-icon.png" ] do |t|
+    "vendor/zxing/zxing.appspot.com/static/zxingiconsmall.png",
+    "vendor/zxing/zxing.appspot.com/static/zxingicon.png"
+  ] do |t|
   sh "png2icns #{t} #{t.prerequisites.grep(%r{.png$}).join(' ')}"
 end
 
 cocoa_app "ZXing" => 
-  %w(main.rb) +
-  Dir["lib/**/*.rb"] +
+  %w(src) +
   %w(lib/zxing/objc/zxing)
  
 task :default => "ZXing:run"
