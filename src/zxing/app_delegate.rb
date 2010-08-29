@@ -5,6 +5,12 @@ require 'zxing/main_menu'
 
 class ZXing::AppDelegate < NSObject
 
+  def preferences
+    prefs = NSUserDefaults.standardUserDefaults
+    prefs.registerDefaults show_luminance:false, show_binary:false
+    @options = prefs
+  end
+
   def applicationDidFinishLaunching notification
 
     load_bridge_support_file resource("zxing.bridgesupport")
@@ -15,11 +21,7 @@ class ZXing::AppDelegate < NSObject
       end
     end
 
-    @options = {
-      :show_luminance => true,
-      :show_binary => true,
-      :continuous => true
-    }
+    preferences
 
     @mask = NSTitledWindowMask|
       NSClosableWindowMask|
@@ -242,6 +244,10 @@ class ZXing::AppDelegate < NSObject
       @capture.binary.removeFromSuperlayer
       @capture.binary = nil
     end
+  end
+
+  def capture item
+    p "capture"
   end
 
 end

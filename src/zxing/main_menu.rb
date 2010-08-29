@@ -119,7 +119,8 @@ module ZXing
                     {quit: {title: "Quit #{name}", key: "cmd:q"}}
                    ],
       view: {{title: "View"} =>
-        [{luminance: {:key => "cmd:l", state: NSApp.delegate.show_luminance}},
+        [{capture: {:key => "cmd:c"}},
+         {luminance: {:key => "cmd:l", state: NSApp.delegate.show_luminance}},
          {binary: {:key => "cmd:b", state: NSApp.delegate.show_binary}}]},
       window:[],
       help:[]
