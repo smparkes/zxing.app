@@ -17,7 +17,8 @@ class ZXing::AppDelegate < NSObject
 
     @options = {
       :show_luminance => true,
-      :show_binary => true
+      :show_binary => true,
+      :continuous => true
     }
 
     @mask = NSTitledWindowMask|
@@ -55,28 +56,50 @@ class ZXing::AppDelegate < NSObject
 
     # capture.layer.frame = NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
 
+    @layer.addSublayer capture.layer
+
     if @options[:show_luminance]
-      capture.showLuminance = true
+      # capture.showLuminance = true
+      @layer.addSublayer capture.luminance
     end
 
     if @options[:show_binary]
-      capture.showBinary = true
+      # capture.showBinary = true
+      @layer.addSublayer capture.binary
     end
 
-    @layer.addSublayer capture.layer
     # @window.contentView.layer = capture.layer
     @window.contentView.layer = @layer
     @window.contentView.wantsLayer = true
+
+    contents = NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
+    contents = @window.contentView.frame
+    @tv = NSTextField.alloc.initWithFrame [0,
+                                           contents.size.height-100,
+                                           contents.size.width,
+                                           100]
+    @tv.stringValue = ""
+    @tv.textColor = NSColor.yellowColor
+    @tv.backgroundColor = NSColor.clearColor
+    @tv.bezeled = false
+    @tv.editable = false
+    @tv.font = NSFont.systemFontOfSize 72
+    @tv.alignment = NSCenterTextAlignment
+    @window.contentView.addSubview @tv
 
     capture.delegate = self
   end
 
   def captureResult capture, result:result
-    if @options[:continuous]
+    if false && @options[:continuous]
       @count ||= 0
       print "#{@count+=1} "
     end
-    puts result.text
+    if result.text != @last_text
+      @tv.stringValue = result.text
+      puts result.text
+    end
+    @last_text = result.text
     if !@options[:continuous]
       # capture.delegate = nil
       # capture.layer.removeFromSuperlayer
@@ -138,6 +161,50 @@ class ZXing::AppDelegate < NSObject
       end
     end
     @capture.layer.frame = frame
+
+    if @options[:show_luminance]
+      frame = [0, 0, size.width, size.height]
+      frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
+      width = frame.size.width
+      frame.size.height *= 1/3.0
+      frame.size.width *= 1/3.0
+
+      window_ar = frame.size.width/frame.size.height
+      video_ar = 1.0*@width/@height
+
+      if (video_ar-window_ar).abs > 0.001
+        if video_ar > window_ar
+          frame.size.height = frame.size.width/video_ar
+        else
+          frame.size.width = frame.size.height*video_ar
+        end
+      end
+
+      frame.origin.x = width - frame.size.width
+
+      @capture.luminance.frame = frame
+    end
+
+    if @options[:show_binary]
+      frame = [0, 0, size.width, size.height]
+      frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
+      frame.size.height *= 1/3.0
+      frame.size.width *= 1/3.0
+
+      window_ar = frame.size.width/frame.size.height
+      video_ar = 1.0*@width/@height
+
+      if (video_ar-window_ar).abs > 0.001
+        if video_ar > window_ar
+          frame.size.height = frame.size.width/video_ar
+        else
+          frame.size.width = frame.size.height*video_ar
+        end
+      end
+
+      @capture.binary.frame = frame
+    end
+
     size
   end
 
