@@ -4,12 +4,32 @@ module ZXing
       params.each do |key, value|
         case key
         when :title; self.title = value
+        when :key
+          key, mask = value.to_s.split(":").inject([nil,0]) do |pair, string|
+            k, m = pair
+            case string
+            when "cmd"; m |= NSCommandKeyMask
+            when "ctl"; m |= NSControlKeyMask
+            when "shift"; m |= NSShiftKeyMask
+            when "opt"; m |= NSAlternateKeyMask
+            else k = string
+            end
+            [k, m]
+          end
+          self.keyEquivalent = key
+          self.keyEquivalentModifierMask = mask
+        when :state
+          self.state = value
         else
           raise "don't understand param #{key}: #{value}"
         end
       end
     end
     def initWithMenu parent, arg:arg
+      self.initWithTitle "", action:nil, keyEquivalent:""
+      # self.target = NSApp.delegate
+      self.target = NSApp.delegate
+      self.enabled = true
       menu = nil
       case arg
       when Hash
@@ -19,8 +39,14 @@ module ZXing
         key = arg.keys.first
         value = arg.values.first
         case key
-        when String; self.title = key
-        when Symbol; self.title = key.to_s.capitalize
+        when String;
+          self.action = "#{key}:".to_sym
+          # p self.action, NSApp.delegate.respondsToSelector(self.action)
+          self.title = key
+        when Symbol;
+          self.action = "#{key}:".to_sym
+          # p self.action, NSApp.delegate.respondsToSelector(self.action)
+          self.title = key.to_s.split("_").map(&:capitalize).join(" ")
         when Hash
           params key
         else
@@ -47,18 +73,20 @@ module ZXing
       else
         raise "implement #{arg.class} item arg #{arg}"
       end
-      self.initWithTitle title, action:nil, keyEquivalent:""
+      # p self, self.action, self.target, self.isEnabled
       parent.addItem self
-      parent.setSubmenu menu, forItem:self if menu
+      if menu
+        case arg.keys.first
+        when :apple; NSApp.setAppleMenu(menu)
+        when :services; NSApp.setServicesMenu(menu)
+        when :window; NSApp.setWindowsMenu(menu)
+        end
+        self.action = self.target = nil
+        parent.setSubmenu menu, forItem:self
+      end
     end
   end
   class Menu < NSMenu
-    def menu *args
-      raise "implement menu"
-    end
-    def item *args
-      raise "implement item"
-    end
     def items *args
       args.each do |arg|
         case arg
@@ -70,27 +98,7 @@ module ZXing
           end
         end
       end
-    end
-    def _items *args
-      args.each do |arg|
-        case arg
-        when Hash
-          arg.each do |key, value|
-            case key
-            when Hash
-              raise "implement hash key #{key}"
-            when String
-              raise "implement string key #{key}"
-            when Symbol
-              raise "implement symbol key #{key}"
-            else
-              raise "implement hash key #{key}"
-            end
-          end
-        when Array; raise "implement array"
-        else; raise "implement #{arg.inspect}"
-        end
-      end
+      update
     end
   end
 
@@ -102,10 +110,17 @@ module ZXing
 
       items apple: [{about: {title: "About #{name}"}},
                     :separator,
-                    {services: []}],
-      view: {{title: "View Me"} =>
-        [{luminance: {}},
-         {binary: {}}]},
+                    {services: []},
+                    :separator,
+                    {hide: {title: "Hide #{name}", key: "cmd:h"}},
+                    {hide_others: {key: "cmd:opt:h"}},
+                    :show_all,
+                    :separator,
+                    {quit: {title: "Quit #{name}", key: "cmd:q"}}
+                   ],
+      view: {{title: "View"} =>
+        [{luminance: {:key => "cmd:l", state: NSApp.delegate.show_luminance}},
+         {binary: {:key => "cmd:b", state: NSApp.delegate.show_binary}}]},
       window:[],
       help:[]
             

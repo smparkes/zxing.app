@@ -208,4 +208,40 @@ class ZXing::AppDelegate < NSObject
     size
   end
 
+  def quit item
+    NSApp.terminate self
+  end
+
+  def show_luminance
+    @options[:show_luminance]
+  end
+
+  def show_binary
+    @options[:show_binary]
+  end
+
+  def luminance item
+    @options[:show_luminance] = !@options[:show_luminance]
+    item.state = @options[:show_luminance]
+    if @options[:show_luminance]
+      @layer.addSublayer @capture.luminance
+      self.windowWillResize @window, toSize:@window.frame.size
+    else
+      @capture.luminance.removeFromSuperlayer
+      @capture.luminance = nil
+    end
+  end
+
+  def binary item
+    @options[:show_binary] = !@options[:show_binary]
+    item.state = @options[:show_binary]
+    if @options[:show_binary]
+      @layer.addSublayer @capture.binary
+      self.windowWillResize @window, toSize:@window.frame.size
+    else
+      @capture.binary.removeFromSuperlayer
+      @capture.binary = nil
+    end
+  end
+
 end
