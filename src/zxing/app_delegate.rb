@@ -64,7 +64,7 @@ class ZXing::AppDelegate < NSObject
       addObserver self, selector: :"resizeNotification:", name:NSViewFrameDidChangeNotification, object:@window.contentView
 
     @layer = CALayer.layer
-    @layer.frame =  NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
+    @layer.frame =  NSWindow.contentRectForFrameRect @window.frame, styleMask:@mask
     @layer.backgroundColor = CGColorGetConstantColor KCGColorBlack
 
     # capture.layer.frame = NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
@@ -85,7 +85,7 @@ class ZXing::AppDelegate < NSObject
     @window.contentView.layer = @layer
     @window.contentView.wantsLayer = true
 
-    contents = NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
+    contents = NSWindow.contentRectForFrameRect @window.frame, styleMask:@mask
     contents = @window.contentView.frame
     @tv = NSTextField.alloc.initWithFrame [0,
                                            contents.size.height-100,
@@ -158,8 +158,8 @@ class ZXing::AppDelegate < NSObject
   end
 
   def resize size
-    frame = [0, 0, size.width, size.height]
-    frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
+    frame = CGRect.new [0, 0], [size.width, size.height]
+    # frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
 
     window_ar = frame.size.width/frame.size.height
     video_ar = 1.0*@width/@height
@@ -176,8 +176,8 @@ class ZXing::AppDelegate < NSObject
     @capture.layer.frame = frame
 
     if @options[:show_luminance]
-      frame = [0, 0, size.width, size.height]
-      frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
+      frame = CGRect.new [0, 0], [size.width, size.height]
+      # frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
       width = frame.size.width
       frame.size.height *= 1/3.0
       frame.size.width *= 1/3.0
@@ -199,8 +199,8 @@ class ZXing::AppDelegate < NSObject
     end
 
     if @options[:show_binary]
-      frame = [0, 0, size.width, size.height]
-      frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
+      frame = CGRect.new [0, 0], [size.width, size.height]
+      # frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
       frame.size.height *= 1/3.0
       frame.size.width *= 1/3.0
 
