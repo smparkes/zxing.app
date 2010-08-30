@@ -92,16 +92,17 @@ class ZXing::AppDelegate < NSObject
     contents = NSWindow.contentRectForFrameRect @window.frame, styleMask:@mask
     contents = @window.contentView.frame
 
-    @tv = NSTextField.alloc.initWithFrame [0.1*contents.size.width,
+    @tv = NSTextView.alloc.initWithFrame [0.1*contents.size.width,
                          0.05*contents.size.height,
                          0.8*contents.size.width,
                          0.45*contents.size.height]
-    @tv.wraps = true
+    @tv.horizontallyResizable = false
+    @tv.verticallyResizable = false
+    @tv.textContainerInset = [10, 10]
     @tv.textColor = NSColor.yellowColor
     @tv.editable = false
-    @tv.font = NSFont.systemFontOfSize 72
+    @tv.font = NSFont.systemFontOfSize 36
     @tv.alignment = NSCenterTextAlignment
-    @tv.bezeled = false
 
     @window.contentView.addSubview @tv
 
@@ -117,26 +118,58 @@ class ZXing::AppDelegate < NSObject
     capture.delegate = self
   end
 
+  def height string, font, width
+    ts = NSTextStorage.alloc.initWithString string
+    tc = NSTextContainer.alloc.initWithContainerSize [width, 9999999]
+    lm = NSLayoutManager.alloc.init
+    lm.addTextContainer tc
+    ts.addLayoutManager lm
+    ts.addAttribute NSFontAttributeName, value:font, range:[0, ts.length]
+    tc.setLineFragmentPadding 0
+    lm.glyphRangeForTextContainer tc
+    return lm.usedRectForTextContainer(tc).size.height
+  end
+
   def captureResult capture, result:result
     value = result.text
-    if result.text != @tv.stringValue
+    if result.text != @tv.string
       Dispatch::Queue.main.async do
-        @tv.stringValue = result.text
-        NSAnimationContext.beginGrouping
-        NSAnimationContext.currentContext.duration = 0.8
-        @tv.animator.alphaValue = 0.8
-        NSAnimationContext.endGrouping
+        begin
+          @tv.string = result.text
+          @tv.frame = @tv_frame
+          h = height result.text, @tv.font, @tv.frame.size.width
+          h += 2*@tv.textContainerInset.height
+          if h < @tv.frame.size.height
+            f = @tv.frame
+            f.size.height = h
+            @tv.frame = f
+          end
+          # NSSpeechSynthesizer.alloc.initWithVoice(NSSpeechSynthesizer.defaultVoice).startSpeakingString("Steven Parkes")
+          # @tv.startSpeaking self
+          # @tv.horizontallyResizable = false
+          # @tv.sizeToFit
+          NSAnimationContext.beginGrouping
+          NSAnimationContext.currentContext.duration = 0.8
+          @tv.animator.alphaValue = 0.9
+          NSAnimationContext.endGrouping
 
-        Dispatch::Queue.main.after 5 do
-          if @tv.stringValue == value
-            NSAnimationContext.beginGrouping
-            NSAnimationContext.currentContext.duration = 0.8
-            @tv.animator.alphaValue = 0
-            NSAnimationContext.endGrouping
+          # this code is fast and loose: it's just a demo after all
+
+          Dispatch::Queue.main.after 5 do
+            if @tv.string == value or @tv.string == ""
+              NSAnimationContext.beginGrouping
+              NSAnimationContext.currentContext.duration = 0.8
+              @tv.animator.alphaValue = 0
+              NSAnimationContext.endGrouping
+              Dispatch::Queue.main.after 1 do
+                if @tv.string == value
+                  @tv.string = ""
+                end
+              end
+            end
           end
-          Dispatch::Queue.main.after 1 do
-            @tv.stringValue = ""
-          end
+        rescue Exception => e
+          p e
         end
       end
       puts result.text
@@ -204,10 +237,10 @@ class ZXing::AppDelegate < NSObject
     @capture.layer.frame = frame
 
     frame = CGRect.new [0, 0], [size.width, size.height]
-    @tv.frame = [0.1*frame.size.width,
-                 0.05*frame.size.height,
-                 0.8*frame.size.width,
-                 0.45*frame.size.height]
+    @tv_frame = @tv.frame = [0.1*frame.size.width,
+                             0.05*frame.size.height,
+                             0.8*frame.size.width,
+                             0.45*frame.size.height]
 
     if @options[:show_luminance]
       frame = CGRect.new [0, 0], [size.width, size.height]
