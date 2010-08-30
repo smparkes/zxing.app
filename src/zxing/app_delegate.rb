@@ -7,7 +7,11 @@ class ZXing::AppDelegate < NSObject
 
   def preferences
     prefs = NSUserDefaults.standardUserDefaults
-    prefs.registerDefaults show_luminance:false, show_binary:false, fullscreen:false
+    prefs.registerDefaults show_luminance:false,
+                           show_binary:false,
+                           fullscreen:false,
+                           continuous:true
+
     @options = prefs
   end
 
@@ -87,32 +91,56 @@ class ZXing::AppDelegate < NSObject
 
     contents = NSWindow.contentRectForFrameRect @window.frame, styleMask:@mask
     contents = @window.contentView.frame
-    @tv = NSTextField.alloc.initWithFrame [0,
-                                           contents.size.height-100,
-                                           contents.size.width,
-                                           100]
-    @tv.stringValue = ""
+
+    @tv = NSTextField.alloc.initWithFrame [0.1*contents.size.width,
+                         0.05*contents.size.height,
+                         0.8*contents.size.width,
+                         0.45*contents.size.height]
+    @tv.wraps = true
     @tv.textColor = NSColor.yellowColor
-    @tv.backgroundColor = NSColor.clearColor
-    @tv.bezeled = false
     @tv.editable = false
     @tv.font = NSFont.systemFontOfSize 72
     @tv.alignment = NSCenterTextAlignment
+    @tv.bezeled = false
+
     @window.contentView.addSubview @tv
+
+    @tv.backgroundColor = NSColor.clearColor
+    @tv.layer.backgroundColor = CGColorCreateGenericRGB 0, 0, 1, 0.4
+    @tv.layer.borderColor = CGColorCreateGenericRGB 1, 1, 1, 0.4
+    @tv.layer.borderWidth = 2
+    @tv.layer.cornerRadius = 10
+
+    # @tv.layer.opacity = 0
+    @tv.alphaValue = 0
 
     capture.delegate = self
   end
 
   def captureResult capture, result:result
-    if false && @options[:continuous]
-      @count ||= 0
-      print "#{@count+=1} "
-    end
-    if result.text != @last_text
-      @tv.stringValue = result.text
+    value = result.text
+    if result.text != @tv.stringValue
+      Dispatch::Queue.main.async do
+        @tv.stringValue = result.text
+        NSAnimationContext.beginGrouping
+        NSAnimationContext.currentContext.duration = 0.8
+        @tv.animator.alphaValue = 0.8
+        NSAnimationContext.endGrouping
+
+        Dispatch::Queue.main.after 5 do
+          if @tv.stringValue == value
+            NSAnimationContext.beginGrouping
+            NSAnimationContext.currentContext.duration = 0.8
+            @tv.animator.alphaValue = 0
+            NSAnimationContext.endGrouping
+          end
+          Dispatch::Queue.main.after 1 do
+            @tv.stringValue = ""
+          end
+        end
+      end
       puts result.text
     end
-    @last_text = result.text
     if !@options[:continuous]
       # capture.delegate = nil
       # capture.layer.removeFromSuperlayer
@@ -174,6 +202,12 @@ class ZXing::AppDelegate < NSObject
       end
     end
     @capture.layer.frame = frame
+
+    frame = CGRect.new [0, 0], [size.width, size.height]
+    @tv.frame = [0.1*frame.size.width,
+                 0.05*frame.size.height,
+                 0.8*frame.size.width,
+                 0.45*frame.size.height]
 
     if @options[:show_luminance]
       frame = CGRect.new [0, 0], [size.width, size.height]
@@ -238,6 +272,9 @@ class ZXing::AppDelegate < NSObject
     item.state = @options[:show_luminance]
     if @options[:show_luminance]
       @layer.addSublayer @capture.luminance
+      if @text_layer
+        @layer.addSublayer @text_layer
+      end
       resize @window.frame.size
     else
       @capture.luminance.removeFromSuperlayer
@@ -250,6 +287,9 @@ class ZXing::AppDelegate < NSObject
     item.state = @options[:show_binary]
     if @options[:show_binary]
       @layer.addSublayer @capture.binary
+      if @text_layer
+        @layer.addSublayer @text_layer
+      end
       resize @window.frame.size
     else
       @capture.binary.removeFromSuperlayer

@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 <!DOCTYPE signatures SYSTEM "file://localhost/System/Library/DTDs/BridgeSupport.dtd">
 <signatures version='1.0'>
+  <constant name='kCGColorWhite' type='^{__CFString=}' />
   <constant name='kCGColorBlack' type='^{__CFString=}' />
   <constant name='kCGColorClear' type='^{__CFString=}' />
+  <constant name='kCATransactionAnimationDuration' type='^{__CFString=}' />
 </signatures>
