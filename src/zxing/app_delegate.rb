@@ -258,7 +258,8 @@ class ZXing::AppDelegate < NSObject
   end
 
   def capture item
-    p "capture"
+    now = Time.now.strftime "%Y-%m-%d at %I.%M.%S %p"
+    @capture.captureToFilename = ENV["HOME"]+"/Desktop/ZXing capture #{now}.png"
   end
 
   def fullscreen item
