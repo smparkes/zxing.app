@@ -7,8 +7,14 @@ class ZXing::AppDelegate < NSObject
 
   def preferences
     prefs = NSUserDefaults.standardUserDefaults
-    prefs.registerDefaults show_luminance:false, show_binary:false
+    prefs.registerDefaults show_luminance:false, show_binary:false, fullscreen:false
     @options = prefs
+  end
+
+  class WindowView < NSView
+    def cancelOperation sender
+      NSApp.delegate.cancel
+    end
   end
 
   def applicationDidFinishLaunching notification
@@ -51,6 +57,11 @@ class ZXing::AppDelegate < NSObject
     @window.title = 'ZXing'
     @window.level = NSNormalWindowLevel
     @window.delegate = self
+    
+    @window.contentView = WindowView.new
+
+    NSNotificationCenter.defaultCenter.
+      addObserver self, selector: :"resizeNotification:", name:NSViewFrameDidChangeNotification, object:@window.contentView
 
     @layer = CALayer.layer
     @layer.frame =  NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
@@ -134,7 +145,7 @@ class ZXing::AppDelegate < NSObject
     @height = height
     Dispatch::Queue.main.async do
       begin
-        windowWillResize @window, toSize:@window.frame.size
+        resize @window.frame.size
         @window.orderFrontRegardless
       rescue Exception => e
         p e
@@ -146,7 +157,7 @@ class ZXing::AppDelegate < NSObject
     true
   end
 
-  def windowWillResize window, toSize:size
+  def resize size
     frame = [0, 0, size.width, size.height]
     frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
 
@@ -227,7 +238,7 @@ class ZXing::AppDelegate < NSObject
     item.state = @options[:show_luminance]
     if @options[:show_luminance]
       @layer.addSublayer @capture.luminance
-      self.windowWillResize @window, toSize:@window.frame.size
+      resize @window.frame.size
     else
       @capture.luminance.removeFromSuperlayer
       @capture.luminance = nil
@@ -239,7 +250,7 @@ class ZXing::AppDelegate < NSObject
     item.state = @options[:show_binary]
     if @options[:show_binary]
       @layer.addSublayer @capture.binary
-      self.windowWillResize @window, toSize:@window.frame.size
+      resize @window.frame.size
     else
       @capture.binary.removeFromSuperlayer
       @capture.binary = nil
@@ -248,6 +259,25 @@ class ZXing::AppDelegate < NSObject
 
   def capture item
     p "capture"
+  end
+
+  def fullscreen item
+    @options[:fullscreen] = !@options[:fullscreen]
+    if @options[:fullscreen]
+      options = {NSFullScreenModeAllScreens => NSNumber.numberWithBool(false)}
+      @window.contentView.enterFullScreenMode @window.screen, withOptions:options
+    else
+      @window.contentView.exitFullScreenModeWithOptions nil
+    end
+  end
+
+  def cancel
+    @options[:fullscreen] = false 
+    @window.contentView.exitFullScreenModeWithOptions nil
+  end
+
+  def resizeNotification notification
+    resize notification.object.frame.size
   end
 
 end
