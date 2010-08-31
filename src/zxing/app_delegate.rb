@@ -33,13 +33,13 @@ class ZXing::AppDelegate < NSObject
 
     preferences
 
-    @mask = NSTitledWindowMask|
+    mask = NSTitledWindowMask|
       NSClosableWindowMask|
       NSMiniaturizableWindowMask|
       NSResizableWindowMask
-    frame = NSWindow.frameRectForContentRect [0, 0, 640, 480 ], styleMask:@mask
+    frame = NSWindow.frameRectForContentRect [0, 0, 640, 480 ], styleMask:mask
     @window = NSWindow.alloc.initWithContentRect(frame,
-                                                 styleMask:@mask,
+                                                 styleMask:mask,
                                                  backing:NSBackingStoreBuffered,
                                                  defer:false)
 
@@ -68,10 +68,10 @@ class ZXing::AppDelegate < NSObject
       addObserver self, selector: :"resizeNotification:", name:NSViewFrameDidChangeNotification, object:@window.contentView
 
     @layer = CALayer.layer
-    @layer.frame =  NSWindow.contentRectForFrameRect @window.frame, styleMask:@mask
+    @layer.frame =  @window.contentRectForFrameRect @window.frame
     @layer.backgroundColor = CGColorGetConstantColor KCGColorBlack
 
-    # capture.layer.frame = NSWindow.contentRectForFrameRect @window.contentView.frame, styleMask:@mask
+    # capture.layer.frame = @window.contentRectForFrameRect @window.contentView.frame
 
     @layer.addSublayer capture.layer
 
@@ -88,9 +88,7 @@ class ZXing::AppDelegate < NSObject
     # @window.contentView.layer = capture.layer
     @window.contentView.layer = @layer
     @window.contentView.wantsLayer = true
-
-    contents = NSWindow.contentRectForFrameRect @window.frame, styleMask:@mask
-    contents = @window.contentView.frame
+    contents =  @window.contentRectForFrameRect(@window.frame)
 
     @tv = NSTextView.alloc.initWithFrame [0.1*contents.size.width,
                          0.05*contents.size.height,
@@ -112,7 +110,6 @@ class ZXing::AppDelegate < NSObject
     @tv.layer.borderWidth = 2
     @tv.layer.cornerRadius = 10
 
-    # @tv.layer.opacity = 0
     @tv.alphaValue = 0
 
     capture.delegate = self
@@ -189,7 +186,8 @@ class ZXing::AppDelegate < NSObject
   end
 
   def size_window
-    frame = NSWindow.frameRectForContentRect @new_frame, styleMask:@mask
+    raise "hell"
+    frame = @window.frameRectForContentRect @new_frame
     @window.setFrame frame, display:true
     # @window.setContentAspectRatio [@new_frame.size.width, @new_frame.size.height]
     @window.orderFrontRegardless
@@ -220,7 +218,7 @@ class ZXing::AppDelegate < NSObject
 
   def resize size
     frame = CGRect.new [0, 0], [size.width, size.height]
-    # frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
+    frame = @window.contentRectForFrameRect frame
 
     window_ar = frame.size.width/frame.size.height
     video_ar = 1.0*@width/@height
@@ -244,7 +242,7 @@ class ZXing::AppDelegate < NSObject
 
     if @options[:show_luminance]
       frame = CGRect.new [0, 0], [size.width, size.height]
-      # frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
+      frame = @window.contentRectForFrameRect frame
       width = frame.size.width
       frame.size.height *= 1/3.0
       frame.size.width *= 1/3.0
@@ -267,7 +265,7 @@ class ZXing::AppDelegate < NSObject
 
     if @options[:show_binary]
       frame = CGRect.new [0, 0], [size.width, size.height]
-      # frame = NSWindow.contentRectForFrameRect frame, styleMask:@mask
+      frame = @window.contentRectForFrameRect frame
       frame.size.height *= 1/3.0
       frame.size.width *= 1/3.0
 
@@ -351,7 +349,7 @@ class ZXing::AppDelegate < NSObject
   end
 
   def resizeNotification notification
-    resize notification.object.frame.size
+    resize @window.frameRectForContentRect(notification.object.frame).size
   end
 
 end

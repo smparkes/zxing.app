@@ -2,3 +2,4 @@
 /Contents/Resources/ZXing.icns
 *.dylib
 *.bundle
+/build
