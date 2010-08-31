@@ -219,6 +219,8 @@ class ZXing::AppDelegate < NSObject
   def resize size
     frame = CGRect.new [0, 0], [size.width, size.height]
     frame = @window.contentRectForFrameRect frame
+    frame = @layer.bounds
+    # p @layer.frame
 
     window_ar = frame.size.width/frame.size.height
     video_ar = 1.0*@width/@height
@@ -235,6 +237,7 @@ class ZXing::AppDelegate < NSObject
     @capture.layer.frame = frame
 
     frame = CGRect.new [0, 0], [size.width, size.height]
+    frame = @layer.bounds
     @tv_frame = @tv.frame = [0.1*frame.size.width,
                              0.05*frame.size.height,
                              0.8*frame.size.width,
@@ -243,6 +246,7 @@ class ZXing::AppDelegate < NSObject
     if @options[:show_luminance]
       frame = CGRect.new [0, 0], [size.width, size.height]
       frame = @window.contentRectForFrameRect frame
+      frame = @layer.bounds
       width = frame.size.width
       frame.size.height *= 1/3.0
       frame.size.width *= 1/3.0
@@ -266,6 +270,7 @@ class ZXing::AppDelegate < NSObject
     if @options[:show_binary]
       frame = CGRect.new [0, 0], [size.width, size.height]
       frame = @window.contentRectForFrameRect frame
+      frame = @layer.bounds
       frame.size.height *= 1/3.0
       frame.size.width *= 1/3.0
 
