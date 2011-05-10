@@ -1,0 +1,17 @@
+= THIS IS A REAL WORK IN PROGRESS
+
+This is a macruby app that demonstrates the use of zxing to decode QR codes.
+
+I used it to play with macruby and to do some prototyping of
+zxing-based stuff.
+
+It has it's own packaging stuff which might be (out)dated.
+
+It needs libicns.
+
+You need to have macruby installed. I use rvm and macruby-nightly. You
+need to have xcode installed.
+
+Clone the repo, then 
+
+Feel free to submit patches and/or other contrbutions.

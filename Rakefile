@@ -1,4 +1,14 @@
 # -*- ruby -*-
+
+macruby = defined?(RUBY_ENGINE) && RUBY_ENGINE == "macruby"
+
+if macruby
+  $stderr.puts "you don't want to run rake under macruby ... just the result"
+  exit -1
+end
+
+$: << File.expand_path( File.dirname(__FILE__) + '/lib' )
+
 require 'cocoa_tasks'
 
 xcode_bundle "lib/zxing/objc/zxing" =>
