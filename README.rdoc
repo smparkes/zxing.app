@@ -1,17 +1,31 @@
 = THIS IS A REAL WORK IN PROGRESS
 
-This is a macruby app that demonstrates the use of zxing to decode QR codes.
+This is a bare bones macruby app that demonstrates the use of zxing to
+decode QR codes.
 
-I used it to play with macruby and to do some prototyping of
-zxing-based stuff.
+I used it to play with macruby and to do some prototyping/development
+of zxing-based stuff.
 
-It has it's own packaging stuff which might be (out)dated.
+It has its own packaging stuff which might be (out)dated.
 
 It needs libicns.
 
 You need to have macruby installed. I use rvm and macruby-nightly. You
-need to have xcode installed.
+need to have xcode installed but you don't need to run it
+yourself. Running rake will call it from the command line.
 
-Clone the repo, then 
+Clone the repo, then do a "git submodule update --init" to pull in
+zxing (kinda big).
 
-Feel free to submit patches and/or other contrbutions.
+Then, _in a non-macruby ruby_, run rake. (At least right now, rake
+under macruby doesn't seem to like shelling out to run xcodebuild).
+
+This will build zxing.app and run it. Presuming you're running on a
+mac with an isight camera, it'll pop up a window and start
+decoding. All it does right now is pops up the text when it decodes a
+code.
+
+There are some rake task for packing the resulting app as a bundle but
+that stuff in particular is dated.
+
+Feel free to submit patches and/or other contributions.
