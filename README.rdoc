@@ -1,3 +1,7 @@
+= Screen shot
+
+[http://dl.dropbox.com/u/11615635/zxing.app.png](http://dl.dropbox.com/u/11615635/zxing.app.png)
+
 = THIS IS A REAL WORK IN PROGRESS
 
 This is a bare bones macruby app that demonstrates the use of zxing to
