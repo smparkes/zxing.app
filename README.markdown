@@ -1,8 +1,8 @@
-= Screen shot
+# Screen shot
 
 http://dl.dropbox.com/u/11615635/zxing.app.png
 
-= THIS IS A REAL WORK IN PROGRESS
+# THIS IS A REAL WORK IN PROGRESS
 
 This is a bare bones macruby app that demonstrates the use of zxing to
 decode QR codes.
@@ -34,7 +34,7 @@ that stuff in particular is dated.
 
 Feel free to submit patches and/or other contributions.
 
-== LICENSE:
+## LICENSE:
 
 (The MIT License)
 
