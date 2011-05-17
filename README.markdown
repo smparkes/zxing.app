@@ -1,6 +1,8 @@
 # Screen shot
 
-http://dl.dropbox.com/u/11615635/zxing.app.png
+[http://dl.dropbox.com/u/11615635/zxing.app.png](http://dl.dropbox.com/u/11615635/zxing.app.png)
+
+![Screenshot](http://dl.dropbox.com/u/11615635/zxing.app.png)
 
 # THIS IS A REAL WORK IN PROGRESS
 
