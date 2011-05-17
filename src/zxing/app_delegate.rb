@@ -38,10 +38,11 @@ class ZXing::AppDelegate < NSObject
       NSMiniaturizableWindowMask|
       NSResizableWindowMask
     frame = NSWindow.frameRectForContentRect [0, 0, 640, 480 ], styleMask:mask
-    @window = NSWindow.alloc.initWithContentRect(frame,
-                                                 styleMask:mask,
-                                                 backing:NSBackingStoreBuffered,
-                                                 defer:false)
+    @window = NSWindow.alloc.
+      initWithContentRect(frame,
+                          styleMask:mask,
+                          backing:NSBackingStoreBuffered,
+                          defer:false)
 
     
     @window.center
@@ -71,17 +72,19 @@ class ZXing::AppDelegate < NSObject
     @layer.frame =  @window.contentRectForFrameRect @window.frame
     @layer.backgroundColor = CGColorGetConstantColor KCGColorBlack
 
-    # capture.layer.frame = @window.contentRectForFrameRect @window.contentView.frame
+    # capture.layer.frame =
+    #  @window.contentRectForFrameRect @window.contentView.frame
 
     @layer.addSublayer capture.layer
 
     if @options[:show_luminance]
       # capture.showLuminance = true
+      capture.luminance = true
       @layer.addSublayer capture.luminance
     end
 
     if @options[:show_binary]
-      # capture.showBinary = true
+      capture.binary = true
       @layer.addSublayer capture.binary
     end
 
@@ -185,20 +188,6 @@ class ZXing::AppDelegate < NSObject
     File.join(file, name) if file
   end
 
-  def size_window
-    raise "hell"
-    frame = @window.frameRectForContentRect @new_frame
-    @window.setFrame frame, display:true
-    # @window.setContentAspectRatio [@new_frame.size.width, @new_frame.size.height]
-    @window.orderFrontRegardless
-
-    # I've always wanted a detect which returns the first mapped ... must exist?
-
-    img = resource "ZXing.icns"
-
-    NSApplication.sharedApplication.setApplicationIconImage NSImage.alloc.initByReferencingFile(img) if img
-  end
-
   def captureSize capture, width:width, height:height
     @width = width
     @height = height
@@ -264,6 +253,7 @@ class ZXing::AppDelegate < NSObject
 
       frame.origin.x = width - frame.size.width
 
+      @capture.luminance = true;
       @capture.luminance.frame = frame
     end
 
@@ -285,6 +275,7 @@ class ZXing::AppDelegate < NSObject
         end
       end
 
+      @capture.binary = true
       @capture.binary.frame = frame
     end
 
@@ -307,6 +298,7 @@ class ZXing::AppDelegate < NSObject
     @options[:show_luminance] = !@options[:show_luminance]
     item.state = @options[:show_luminance]
     if @options[:show_luminance]
+      @capture.luminance = true
       @layer.addSublayer @capture.luminance
       if @text_layer
         @layer.addSublayer @text_layer
@@ -314,7 +306,7 @@ class ZXing::AppDelegate < NSObject
       resize @window.frame.size
     else
       @capture.luminance.removeFromSuperlayer
-      @capture.luminance = nil
+      @capture.luminance = false
     end
   end
 
@@ -322,6 +314,7 @@ class ZXing::AppDelegate < NSObject
     @options[:show_binary] = !@options[:show_binary]
     item.state = @options[:show_binary]
     if @options[:show_binary]
+      @capture.binary = true
       @layer.addSublayer @capture.binary
       if @text_layer
         @layer.addSublayer @text_layer
@@ -329,7 +322,7 @@ class ZXing::AppDelegate < NSObject
       resize @window.frame.size
     else
       @capture.binary.removeFromSuperlayer
-      @capture.binary = nil
+      @capture.binary = false
     end
   end
 
