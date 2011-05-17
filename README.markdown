@@ -38,7 +38,7 @@ Feel free to submit patches and/or other contributions.
 
 (The MIT License)
 
-Copyright (c) 2011 {Steven Parkes}[http://github.com/smparkes]
+Copyright (c) 2011 [Steven Parkes](http://github.com/smparkes)
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
