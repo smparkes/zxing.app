@@ -21,15 +21,15 @@ yourself. Running rake will call it from the command line.
 Clone the repo, then do a "git submodule update --init" to pull in
 zxing (kinda big).
 
-Then, _in a non-macruby ruby_, run rake. (At least right now, rake
+Then, *in a non-macruby ruby*, run rake. (At least right now, rake
 under macruby doesn't seem to like shelling out to run xcodebuild).
 
 This will build zxing.app and run it. Presuming you're running on a
-mac with an isight camera, it'll pop up a window and start
-decoding. All it does right now is pops up the text when it decodes a
+mac with an iSight camera, it'll pop up a window and start
+decoding. All it does right now is pop up the text when it decodes a
 code.
 
-There are some rake task for packing the resulting app as a bundle but
+There are some rake tasks for packing the resulting app as a bundle but
 that stuff in particular is dated.
 
 Feel free to submit patches and/or other contributions.
