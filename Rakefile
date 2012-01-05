@@ -30,8 +30,8 @@ directory "Contents/Resources"
 
 file "Contents/Resources/ZXing.icns" =>
   [ "Contents/Resources",
-    "vendor/zxing/zxing.appspot.com/static/zxingiconsmall.png",
-    "vendor/zxing/zxing.appspot.com/static/zxingicon.png"
+    "vendor/zxing/zxing.appspot.com/war/zxingiconsmall.png",
+    "vendor/zxing/zxing.appspot.com/war/zxingicon.png"
   ] do |t|
   sh "png2icns #{t} #{t.prerequisites.grep(%r{.png$}).join(' ')}"
 end
